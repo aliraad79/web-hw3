@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -12,16 +13,52 @@ import (
 	"gorm.io/gorm"
 )
 
+const BEARER_SCHEMA = "Bearer "
+
 type Note struct {
 	gorm.Model
-	Title string `json:"Title" binding:"required"`
-	Body  string `json:"Body" binding:"required"`
+	Title  string `json:"Title" binding:"required"`
+	Body   string `json:"Body" binding:"required"`
+	UserID int
+	User   User //`json:"owner" binding:"required"`
 }
 
 type User struct {
 	gorm.Model
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+func JWTMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" || !strings.Contains(authHeader, BEARER_SCHEMA) || len(strings.Split(authHeader, " ")) != 2 {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		tokenString := authHeader[len(BEARER_SCHEMA):]
+		claims := jwt.MapClaims{}
+		tkn, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("ACCESS_SECRET")), nil
+		})
+		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		if !tkn.Valid {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		c.Next()
+	}
+}
+
+func NoteToJSON(note Note) map[string]interface{} {
+	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "owner": note.UserID}
 }
 
 func CreateToken(userid uint) (string, error) {
@@ -41,11 +78,12 @@ func CreateToken(userid uint) (string, error) {
 
 func main() {
 
-	r := gin.Default()
-	// load env variables
-	err := godotenv.Load()
+	router := gin.Default()
+	note_router := router.Group("/notes")
+	// note_router.Use(JWTMiddleware())
 
-	if err != nil {
+	// load env variables
+	if err := godotenv.Load(); err != nil {
 		panic("Error loading .env file")
 	}
 	// connect to db
@@ -58,34 +96,28 @@ func main() {
 	db.AutoMigrate(&Note{})
 	db.AutoMigrate(&User{})
 
-	r.POST("/notes/new", func(c *gin.Context) {
-		var input_json Note
-		c.BindJSON(&input_json)
-		var note_title = input_json.Title
-		var note_body = input_json.Body
-
-		if note_title == "" || note_body == "" {
+	note_router.POST("/new", func(c *gin.Context) {
+		var note Note
+		if err := c.ShouldBindJSON(&note); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
-		} else {
-			note := Note{Title: note_title, Body: note_body}
-			db.Create(&note)
-			c.JSON(http.StatusOK, gin.H{"ID": note.ID})
+			return
 		}
-
+		db.Create(&note)
+		c.JSON(http.StatusOK, NoteToJSON(note))
 	})
 
-	r.GET("/notes/:note_id", func(c *gin.Context) {
+	note_router.GET("/:note_id", func(c *gin.Context) {
 		note_id := c.Param("note_id")
 		var note Note
 		err := db.First(&note, note_id)
 		if err.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"Title": note.Title, "Body": note.Body})
+			c.JSON(http.StatusOK, NoteToJSON(note))
 		}
 	})
 
-	r.DELETE("/notes/:note_id", func(c *gin.Context) {
+	note_router.DELETE("/:note_id", func(c *gin.Context) {
 		note_id := c.Param("note_id")
 		var note Note
 		err := db.Delete(&note, note_id)
@@ -96,30 +128,30 @@ func main() {
 		}
 	})
 
-	r.PUT("/notes/:note_id", func(c *gin.Context) {
-		note_id := c.Param("note_id")
-		var input_json Note
-		c.BindJSON(&input_json)
-		var new_title = input_json.Title
-		var new_body = input_json.Body
-
+	note_router.PUT("/:note_id", func(c *gin.Context) {
 		var note Note
+		if err := c.ShouldBindJSON(&note); err != nil {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
+			return
+		}
+
+		note_id := c.Param("note_id")
 		object := db.First(&note, note_id)
 
 		if object.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
 		} else {
-			if new_title != "" {
-				object.Update("Title", new_title)
+			if note.Title != "" {
+				object.Update("Title", note.Title)
 			}
-			if new_body != "" {
-				object.Update("Body", new_body)
+			if note.Body != "" {
+				object.Update("Body", note.Body)
 			}
-			c.JSON(http.StatusOK, gin.H{"Title": note.Title, "Body": note.Body})
+			c.JSON(http.StatusOK, NoteToJSON(note))
 		}
 	})
 
-	r.POST("/login", func(c *gin.Context) {
+	router.POST("/login", func(c *gin.Context) {
 		var u User
 		if err := c.ShouldBindJSON(&u); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
@@ -137,10 +169,10 @@ func main() {
 			c.JSON(http.StatusUnprocessableEntity, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, token)
+		c.JSON(http.StatusOK, gin.H{"token": BEARER_SCHEMA + token})
 	})
 
-	r.POST("/signup", func(c *gin.Context) {
+	router.POST("/signup", func(c *gin.Context) {
 		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
@@ -150,5 +182,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"ID": user.ID})
 	})
 
-	r.Run(":8080")
+	router.Run(":8080")
 }
