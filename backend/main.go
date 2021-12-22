@@ -14,25 +14,6 @@ type Note struct {
 	Body  string `json:"Body" binding:"required"`
 }
 
-func connectToDB() {
-	// Create
-	// db.Create(&Note{Code: "D42", Price: 100})
-
-	// // Read
-	// var product Note
-	// db.First(&product, 1)                 // find product with integer primary key
-	// db.First(&product, "code = ?", "D42") // find product with code D42
-
-	// // Update - update product's price to 200
-	// db.Model(&product).Update("Price", 200)
-	// // Update - update multiple fields
-	// db.Model(&product).Updates(Product{Price: 200, Code: "F42"}) // non-zero fields
-	// db.Model(&product).Updates(map[string]interface{}{"Price": 200, "Code": "F42"})
-
-	// // Delete - delete product
-	// db.Delete(&product, 1)
-}
-
 func main() {
 
 	r := gin.Default()
@@ -64,8 +45,46 @@ func main() {
 	r.GET("/notes/:note_id", func(c *gin.Context) {
 		note_id := c.Param("note_id")
 		var note Note
-		db.First(&note, note_id)
-		c.JSON(http.StatusOK, gin.H{"Title": note.Title, "Body": note.Body})
+		err := db.First(&note, note_id)
+		if err.Error != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"Title": note.Title, "Body": note.Body})
+		}
+	})
+
+	r.DELETE("/notes/:note_id", func(c *gin.Context) {
+		note_id := c.Param("note_id")
+		var note Note
+		err := db.Delete(&note, note_id)
+		if err.Error != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
+		}
+	})
+
+	r.PUT("/notes/:note_id", func(c *gin.Context) {
+		note_id := c.Param("note_id")
+		var input_json Note
+		c.BindJSON(&input_json)
+		var new_title = input_json.Title
+		var new_body = input_json.Body
+
+		var note Note
+		object := db.First(&note, note_id)
+
+		if object.Error != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else {
+			if new_title != "" {
+				object.Update("Title", new_title)
+			}
+			if new_body != "" {
+				object.Update("Body", new_body)
+			}
+			c.JSON(http.StatusOK, gin.H{"Title": note.Title, "Body": note.Body})
+		}
 	})
 
 	r.Run(":8080")
