@@ -160,7 +160,7 @@ func main() {
 		var user User
 		e := db.Where("username = ?", u.Username).First(&user)
 
-		if e.Error != nil || user.Password != user.Password {
+		if e.Error != nil || u.Password != user.Password {
 			c.JSON(http.StatusUnauthorized, gin.H{"Result": "Please provide valid login details"})
 			return
 		}
