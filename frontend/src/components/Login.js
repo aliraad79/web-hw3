@@ -1,34 +1,55 @@
 import { Form, Button } from "react-bootstrap";
 import { useState } from "react";
+import axios from "axios";
 
 const Login = () => {
-  const [token, setToken] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const login = async (cred) => {
-    const res = await fetch("http://localhost:8080/login", {
+  const login_user = async (event) => {
+    event.preventDefault();
+    const res = fetch("http://localhost:8080/login", {
       method: "POST",
-      headers: { "Content-type": "application/json" },
       body: JSON.stringify({
-        username: cred.target[0].value,
-        password: cred.target[1].value,
+        username: username,
+        password: password,
       }),
-    });
-    const data = await res.json();
-    alert(data);
-    // setToken(data);
+    })
+      .then((response) => {
+        if (response.status !== 401) {
+          return response.json();
+        } else {
+          console.log("User not found");
+        }
+      })
+      .then((response) => {
+        localStorage.setItem("token", `${response.token}`);
+      });
   };
 
   return (
     <center>
-      <Form onSubmit={login}>
+      <Form onSubmit={login_user}>
         <Form.Group className="mb-3" controlId="formBasicUsername">
           <Form.Label>Username</Form.Label>
-          <Form.Control type="username" placeholder="username" />
+          <Form.Control
+            type="username"
+            placeholder="username"
+            onChange={(e) => {
+              setUsername(e.target.value);
+            }}
+          />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
-          <Form.Control type="password" placeholder="Password" />
+          <Form.Control
+            type="password"
+            placeholder="Password"
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+          />
         </Form.Group>
         <Button variant="primary" type="submit">
           Login
