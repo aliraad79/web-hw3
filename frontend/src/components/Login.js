@@ -1,14 +1,15 @@
 import { Form, Button } from "react-bootstrap";
 import { useState } from "react";
-import axios from "axios";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const login_user = async (event) => {
     event.preventDefault();
-    const res = fetch("http://localhost:8080/login", {
+    await fetch("http://localhost:8080/login", {
       method: "POST",
       body: JSON.stringify({
         username: username,
@@ -24,6 +25,7 @@ const Login = () => {
       })
       .then((response) => {
         localStorage.setItem("token", `${response.token}`);
+        navigate("/notes", { replace: true });
       });
   };
 
