@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "react-bootstrap";
 import Note from "./Note";
+import BASE_SERVER_URL from "../consts";
 
 const Notes = (props) => {
   const [notes, setNotes] = useState([]);
@@ -16,28 +17,28 @@ const Notes = (props) => {
   }, []);
 
   const fetchAllNotes = async () => {
-    const res = await fetch(`http://localhost:8080/notes/`);
+    const res = await fetch(`${BASE_SERVER_URL}/notes/`);
     const data = await res.json();
     return data;
   };
 
   const onDelete = (id) => {
     console.log(id);
-    fetch(`http://localhost:8080/notes/${id}`, { method: "DELETE" });
+    fetch(`${BASE_SERVER_URL}/notes/${id}`, { method: "DELETE" });
     setNotes(notes.filter((note) => note.id !== id));
   };
 
   const updateOrAddNote = async (note) => {
     let new_id = 0;
     if (note.id === 0) {
-      fetch(`http://localhost:8080/notes/new`, {
+      fetch(`${BASE_SERVER_URL}/notes/new`, {
         method: "POST",
         body: JSON.stringify(note),
       })
         .then((response) => response.json())
         .then((response) => (new_id = response.ID));
     } else {
-      const res = await fetch(`http://localhost:8080/notes/${note.id}`, {
+      const res = await fetch(`${BASE_SERVER_URL}/notes/${note.id}`, {
         method: "PUT",
         body: JSON.stringify(note),
       });

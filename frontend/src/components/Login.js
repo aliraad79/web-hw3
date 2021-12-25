@@ -1,6 +1,7 @@
 import { Form, Button } from "react-bootstrap";
 import { useState } from "react";
 import {  useNavigate } from "react-router-dom";
+import BASE_SERVER_URL from "../consts";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -9,7 +10,7 @@ const Login = () => {
 
   const login_user = async (event) => {
     event.preventDefault();
-    await fetch("http://localhost:8080/login", {
+    await fetch(`${BASE_SERVER_URL}/login`, {
       method: "POST",
       body: JSON.stringify({
         username: username,
