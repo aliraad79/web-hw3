@@ -1,6 +1,6 @@
 import { Form, Button } from "react-bootstrap";
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
