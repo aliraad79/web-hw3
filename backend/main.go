@@ -15,6 +15,8 @@ import (
 
 const BEARER_SCHEMA = "Bearer "
 
+type M map[string]interface{}
+
 type Note struct {
 	gorm.Model
 	Title  string `json:"Title" binding:"required"`
@@ -106,6 +108,17 @@ func main() {
 	// Migrate the schema
 	db.AutoMigrate(&Note{})
 	db.AutoMigrate(&User{})
+
+	note_router.GET("/", func(c *gin.Context) {
+		var notes []Note
+		db.Find(&notes)
+		var response []M
+
+		for _, u := range notes {
+			response = append(response, M{"Body": u.Body, "Title": u.Title})
+		}
+		c.JSON(http.StatusOK, response)
+	})
 
 	note_router.POST("/new", func(c *gin.Context) {
 		var note Note
