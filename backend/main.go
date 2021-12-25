@@ -83,7 +83,7 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
 		c.Next()
 	}
 }
@@ -115,9 +115,14 @@ func main() {
 		var response []M
 
 		for _, u := range notes {
-			response = append(response, M{"Body": u.Body, "Title": u.Title})
+			response = append(response, M{"Body": u.Body, "Title": u.Title, "id": u.ID})
 		}
 		c.JSON(http.StatusOK, response)
+	})
+
+	note_router.OPTIONS("/:note_id", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.JSON(http.StatusOK, "")
 	})
 
 	note_router.POST("/new", func(c *gin.Context) {
