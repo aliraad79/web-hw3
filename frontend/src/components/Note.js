@@ -1,11 +1,13 @@
 import { Button, Form, Container, Row, Col } from "react-bootstrap";
 import { useState } from "react";
-import { FaTrash, FaPencilAlt } from "react-icons/fa";
+import { FaTrash, FaPencilAlt, FaCheckCircle } from "react-icons/fa";
 
-const Note = ({ subject, text, readOnly }) => {
-  const [sub, setSubject] = useState(subject);
-  const [_text, setText] = useState(text);
-  const [editMode, setEditMode] = useState(readOnly);
+const Note = ({ note, onDelete, onUpdateOrAdd }) => {
+  let empty_note = note.id === 0;
+  const [title, setTitle] = useState(note.Title);
+  const [body, setBody] = useState(note.Body);
+  const [editMode, setEditMode] = useState(!empty_note);
+  const [accept, setAccept] = useState(empty_note);
 
   return (
     <Container className="bg-info">
@@ -17,19 +19,35 @@ const Note = ({ subject, text, readOnly }) => {
               type="text"
               placeholder="Subject"
               readOnly={editMode}
-              value={sub}
+              value={title}
               onChange={(e) => {
-                setSubject(e.target.value);
+                setTitle(e.target.value);
               }}
             />
           </Col>
           <Col>
-            <Button>
+            <Button onClick={(e) => onDelete(note.id)}>
               <FaTrash />
             </Button>
-            <Button onClick={(e) => setEditMode(!editMode)}>
+            <Button
+              onClick={(e) => {
+                setEditMode(!editMode);
+                setAccept(editMode);
+              }}
+            >
               <FaPencilAlt />
             </Button>
+            {accept && (
+              <Button
+                onClick={(e) => {
+                  setEditMode(!editMode);
+                  setAccept(editMode);
+                  onUpdateOrAdd({ id: note.id, Title: title, Body: body });
+                }}
+              >
+                <FaCheckCircle />
+              </Button>
+            )}
           </Col>
         </Row>
         <br />
@@ -40,9 +58,9 @@ const Note = ({ subject, text, readOnly }) => {
               placeholder="Text"
               rows={3}
               readOnly={editMode}
-              defaultValue={_text}
+              defaultValue={body}
               onChange={(e) => {
-                setText(e.target.value);
+                setBody(e.target.value);
               }}
             />
           </Col>
