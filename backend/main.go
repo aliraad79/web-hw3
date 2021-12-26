@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -22,13 +22,14 @@ type Note struct {
 	Title  string `json:"Title" binding:"required"`
 	Body   string `json:"Body" binding:"required"`
 	UserID int
-	User   User //`json:"owner" binding:"required"`
+	User   User `json:"owner" binding:"required"`
 }
 
 type User struct {
 	gorm.Model
 	Username string `json:"username"`
 	Password string `json:"password"`
+	is_admin bool   `json:"is_admin"`
 }
 
 func JWTMiddleware() gin.HandlerFunc {
@@ -55,6 +56,12 @@ func JWTMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
+		user_id := tkn.Claims.(jwt.MapClaims)["user_id"]
+		is_admin := tkn.Claims.(jwt.MapClaims)["is_admin"]
+
+		c.Set("user_id", user_id)
+		c.Set("is_admin", is_admin)
+
 		c.Next()
 	}
 }
@@ -63,12 +70,13 @@ func NoteToJSON(note Note) map[string]interface{} {
 	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "owner": note.UserID}
 }
 
-func CreateToken(userid uint) (string, error) {
+func CreateToken(userid uint, is_admin bool) (string, error) {
 	var err error
 	//Creating Access Token
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
-	atClaims["user_id"] = 10
+	atClaims["user_id"] = userid
+	atClaims["is_admin"] = is_admin
 	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
@@ -93,16 +101,18 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 	note_router := router.Group("/notes")
-	// note_router.Use(JWTMiddleware())
+	note_router.Use(JWTMiddleware())
 
 	// load env variables
 	if err := godotenv.Load(); err != nil {
 		panic("Error loading .env file")
 	}
-	// connect to db
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	//connect to db
+	dsn := "host=localhost user=postgres password=postgres dbname=web3 port=8090 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		panic("failed to connect database")
+		panic("failed to connect to database")
 	}
 
 	// Migrate the schema
@@ -114,8 +124,13 @@ func main() {
 		db.Find(&notes)
 		var response []M
 
+		user_id, _ := c.Get("user_id")
+		is_admin, _ := c.Get("is_admin")
+
 		for _, u := range notes {
-			response = append(response, M{"Body": u.Body, "Title": u.Title, "id": u.ID})
+			if int(user_id.(float64)) == u.UserID || !is_admin.(bool) {
+				response = append(response, M{"Body": u.Body, "Title": u.Title, "id": u.ID})
+			}
 		}
 		c.JSON(http.StatusOK, response)
 	})
@@ -128,9 +143,11 @@ func main() {
 	note_router.POST("/new", func(c *gin.Context) {
 		var note Note
 		if err := c.ShouldBindJSON(&note); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": err})
 			return
 		}
+		user_id, _ := c.Get("user_id")
+		note.UserID = int(user_id.(float64))
 		db.Create(&note)
 		c.JSON(http.StatusOK, NoteToJSON(note))
 	})
@@ -139,8 +156,14 @@ func main() {
 		note_id := c.Param("note_id")
 		var note Note
 		err := db.First(&note, note_id)
+
+		user_id, _ := c.Get("user_id")
+		is_admin, _ := c.Get("is_admin")
+
 		if err.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else if note.UserID != int(user_id.(float64)) || !is_admin.(bool) {
+			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
 		} else {
 			c.JSON(http.StatusOK, NoteToJSON(note))
 		}
@@ -149,9 +172,15 @@ func main() {
 	note_router.DELETE("/:note_id", func(c *gin.Context) {
 		note_id := c.Param("note_id")
 		var note Note
+
+		user_id, _ := c.Get("user_id")
+		is_admin, _ := c.Get("is_admin")
+
 		err := db.Delete(&note, note_id)
 		if err.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else if note.UserID != user_id || !is_admin.(bool) {
+			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't delete someone else note"})
 		} else {
 			c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
 		}
@@ -164,11 +193,15 @@ func main() {
 			return
 		}
 
+		user_id, _ := c.Get("user_id")
+		is_admin, _ := c.Get("is_admin")
 		note_id := c.Param("note_id")
 		object := db.First(&note, note_id)
 
 		if object.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else if note.UserID != user_id || !is_admin.(bool) {
+			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't update someone else note"})
 		} else {
 			if note.Title != "" {
 				object.Update("Title", note.Title)
@@ -193,7 +226,7 @@ func main() {
 			c.JSON(http.StatusUnauthorized, gin.H{"Result": "Please provide valid login details"})
 			return
 		}
-		token, err := CreateToken(user.ID)
+		token, err := CreateToken(user.ID, user.is_admin)
 		if err != nil {
 			c.JSON(http.StatusUnprocessableEntity, err.Error())
 			return
