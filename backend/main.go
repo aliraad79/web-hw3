@@ -90,7 +90,7 @@ func main() {
 
 		if err.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		} else if note.UserID != int(user_id.(float64)) || !is_admin.(bool) {
+		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
 			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
 		} else {
 			c.JSON(http.StatusOK, NoteToJSON(note))
@@ -107,7 +107,7 @@ func main() {
 		err := db.Delete(&note, note_id)
 		if err.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		} else if note.UserID != user_id || !is_admin.(bool) {
+		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
 			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't delete someone else note"})
 		} else {
 			c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
@@ -115,8 +115,9 @@ func main() {
 	})
 
 	note_router.PUT("/:note_id", func(c *gin.Context) {
+		var new_note Note
 		var note Note
-		if err := c.ShouldBindJSON(&note); err != nil {
+		if err := c.ShouldBindJSON(&new_note); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
 			return
 		}
@@ -128,16 +129,16 @@ func main() {
 
 		if object.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		} else if note.UserID != user_id || !is_admin.(bool) {
+		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
 			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't update someone else note"})
 		} else {
-			if note.Title != "" {
-				object.Update("Title", note.Title)
+			if new_note.Title != "" {
+				object.Update("Title", new_note.Title)
 			}
-			if note.Body != "" {
-				object.Update("Body", note.Body)
+			if new_note.Body != "" {
+				object.Update("Body", new_note.Body)
 			}
-			c.JSON(http.StatusOK, NoteToJSON(note))
+			c.JSON(http.StatusOK, NoteToJSON(new_note))
 		}
 	})
 
