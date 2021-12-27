@@ -39,11 +39,7 @@ func JWTMiddleware() gin.HandlerFunc {
 			return []byte(os.Getenv("ACCESS_SECRET")), nil
 		})
 		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
-				c.AbortWithStatus(http.StatusUnauthorized)
-				return
-			}
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 		if !tkn.Valid {
