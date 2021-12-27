@@ -1,4 +1,4 @@
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Modal } from "react-bootstrap";
 import { useState } from "react";
 import {  useNavigate } from "react-router-dom";
 import BASE_SERVER_URL from "../consts";
@@ -6,6 +6,9 @@ import BASE_SERVER_URL from "../consts";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showModalError, setShowModalError] = useState(false);
+  
+  const handleClose = () => setShowModalError(false);
   const navigate = useNavigate();
 
   const login_user = async (event) => {
@@ -21,6 +24,7 @@ const Login = () => {
         if (response.status !== 401) {
           return response.json();
         } else {
+          setShowModalError(true);
           console.log("User not found");
         }
       })
@@ -58,6 +62,18 @@ const Login = () => {
           Login
         </Button>
       </Form>
+      
+      <Modal show={showModalError} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Login Error</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Username or password is incorrect</Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleClose}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </center>
   );
 };
