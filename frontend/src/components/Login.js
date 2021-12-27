@@ -1,13 +1,21 @@
-import { Form, Button, Modal } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Modal,
+  FloatingLabel,
+  Container,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import BASE_SERVER_URL from "../consts";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showModalError, setShowModalError] = useState(false);
-  
+
   const handleClose = () => setShowModalError(false);
   const navigate = useNavigate();
 
@@ -25,7 +33,6 @@ const Login = () => {
           return response.json();
         } else {
           setShowModalError(true);
-          console.log("User not found");
         }
       })
       .then((response) => {
@@ -35,34 +42,39 @@ const Login = () => {
   };
 
   return (
-    <center>
-      <Form onSubmit={login_user}>
-        <Form.Group className="mb-3" controlId="formBasicUsername">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
-            type="username"
-            placeholder="username"
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
-          />
-        </Form.Group>
+    <Container>
+      <Row>
+        <Col></Col>
+        <Col>
+          <Form onSubmit={login_user}>
+            <FloatingLabel label="Username">
+              <Form.Control
+                type="username"
+                placeholder="username"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+              />
+            </FloatingLabel>
 
-        <Form.Group className="mb-3" controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Password"
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Login
-        </Button>
-      </Form>
-      
+            <FloatingLabel label="Password">
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+              />
+            </FloatingLabel>
+            <center>
+              <Button variant="primary" type="submit">
+                Login
+              </Button>
+            </center>
+          </Form>
+        </Col>
+        <Col></Col>
+      </Row>
       <Modal show={showModalError} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Login Error</Modal.Title>
@@ -74,7 +86,7 @@ const Login = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-    </center>
+    </Container>
   );
 };
 
