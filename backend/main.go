@@ -58,12 +58,7 @@ func main() {
 		c.JSON(http.StatusOK, response)
 	})
 
-	note_router.OPTIONS("/:note_id", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, "")
-	})
-
-	note_router.POST("/new", func(c *gin.Context) {
+	note_router.POST("/", func(c *gin.Context) {
 		var note Note
 		if err := c.ShouldBindJSON(&note); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": err})
@@ -73,6 +68,16 @@ func main() {
 		note.UserID = int(user_id.(float64))
 		db.Create(&note)
 		c.JSON(http.StatusOK, NoteToJSON(note))
+	})
+
+	router.OPTIONS("notes/:note_id", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.JSON(http.StatusOK, "")
+	})
+
+	router.OPTIONS("notes/", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.JSON(http.StatusOK, "")
 	})
 
 	note_router.GET("/:note_id", func(c *gin.Context) {
