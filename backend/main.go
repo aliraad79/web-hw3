@@ -21,6 +21,11 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.JSON(http.StatusOK, "")
+			return
+		}
 		c.Next()
 	}
 }
@@ -68,16 +73,6 @@ func main() {
 		note.UserID = int(user_id.(float64))
 		db.Create(&note)
 		c.JSON(http.StatusOK, NoteToJSON(note))
-	})
-
-	router.OPTIONS("notes/:note_id", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, "")
-	})
-
-	router.OPTIONS("notes/", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.JSON(http.StatusOK, "")
 	})
 
 	note_router.GET("/:note_id", func(c *gin.Context) {
