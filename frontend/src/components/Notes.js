@@ -4,6 +4,7 @@ import { FaPlus } from "react-icons/fa";
 import { Button } from "react-bootstrap";
 import Note from "./Note";
 import BASE_SERVER_URL from "../consts";
+import MyNavbar from "./Navbar";
 
 const Notes = (props) => {
   const [notes, setNotes] = useState([]);
@@ -78,6 +79,8 @@ const Notes = (props) => {
   return !token || token === "" ? (
     <Navigate to={{ pathname: "/" }} />
   ) : (
+    <>
+    <MyNavbar />
     <center>
       <br />
       {notesItems}
@@ -89,6 +92,7 @@ const Notes = (props) => {
         <FaPlus />
       </Button>
     </center>
+    </>
   );
 };
 
