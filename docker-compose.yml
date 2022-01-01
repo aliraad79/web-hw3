@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:6-alpine
+    ports:
+      - 6379:6379
+  
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=docker
+    ports:
+      - "8090:5432"
+
+  react:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - 3000:3000
+    command: npm start
+    depends_on:
+      - db
+  
+  go:
+    container_name: backend
+    image: golang:1.17-alpine
+    command: sh -c "go get && go run *.go"
+    ports:
+      - 8080:8080
+    working_dir: /app/backend
+    volumes:
+      - ./:/app
+    depends_on:
+      - db

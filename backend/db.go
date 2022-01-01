@@ -22,7 +22,7 @@ type User struct {
 
 func initDB() (*gorm.DB, error) {
 
-	dsn := "host=localhost user=postgres password=postgres dbname=web3 port=8090 sslmode=disable"
+	dsn := "host=db user=postgres password=password dbname=docker port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	// Migrate the schema
