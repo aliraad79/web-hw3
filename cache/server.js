@@ -1,8 +1,10 @@
 const grpc = require("grpc");
+const protoLoader = require("@grpc/proto-loader");
 
 const uuid = require("uuid");
 
-const todoproto = grpc.load("todo.proto");
+const packageDefinition = protoLoader.loadSync("notes.proto");
+const notesProto = grpc.loadPackageDefinition(packageDefinition);
 
 const server = new grpc.Server();
 
@@ -12,7 +14,7 @@ console.log("server is running at http://127.0.0.1:50051");
 
 const todos = [];
 
-server.addService(todoproto.TodoService.service, {
+server.addService(notesProto.TodoService.service, {
   list: (_, callback) => {
     callback(null, todos);
   },
