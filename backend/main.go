@@ -47,6 +47,9 @@ func main() {
 		panic("failed to connect to database")
 	}
 
+	//connect to cache via gprc
+	// cacheClient := getCacheClient()
+
 	note_router.GET("/", func(c *gin.Context) {
 		var notes []Note
 		db.Find(&notes)

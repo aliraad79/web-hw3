@@ -1,18 +1,20 @@
 syntax = "proto3";
 
-service TodoService {
-    rpc List(Empty) returns (TodoList) {}
-    rpc Insert(Todo) returns (Todo) {}
+option go_package = "./main";
+
+service CacheService {
+    rpc getKey(Str) returns (Str) {}
+    rpc setKey(Cache) returns (Cache) {}
+    rpc clear(Empty) returns (Empty) {}
 }
 
 message Empty {}
 
-message Todo {
-    string id=1;
-    string title = 2;
-    bool iscompleted = 3;
+message Str {
+    string val = 1;
 }
 
-message TodoList {
-    repeated Todo todo = 1;
+message Cache {
+    string key = 2;
+    string value = 3;
 }
