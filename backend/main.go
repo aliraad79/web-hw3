@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -48,7 +49,8 @@ func main() {
 	}
 
 	//connect to cache via gprc
-	// cacheClient := getCacheClient()
+	cacheClient := getCacheClient()
+	fmt.Println(cacheClient)
 
 	note_router.GET("/", func(c *gin.Context) {
 		var notes []Note
