@@ -17,7 +17,7 @@ func getCacheClient() CacheServiceClient {
 	}
 	defer conn.Close()
 
-	client := NewCacheServiceClient(conn)
+	client := NewCacherClient(conn)
 
 	getCacheKey(client, "ali")
 	setCacheKey(client, "ali", "test")

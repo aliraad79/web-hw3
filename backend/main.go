@@ -39,7 +39,7 @@ func main() {
 	note_router.Use(JWTMiddleware())
 
 	// load env variables
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		panic("Error loading .env file")
 	}
 	//connect to db

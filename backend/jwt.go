@@ -19,7 +19,7 @@ func CreateToken(userid uint, is_admin bool) (string, error) {
 	atClaims["is_admin"] = is_admin
 	atClaims["exp"] = time.Now().Add(time.Hour).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
+	token, err := at.SignedString([]byte(os.Getenv("BACKEND_JWT_SECRET")))
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,7 @@ func JWTMiddleware() gin.HandlerFunc {
 		tokenString := authHeader[len(BEARER_SCHEMA):]
 		claims := jwt.MapClaims{}
 		tkn, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("ACCESS_SECRET")), nil
+			return []byte(os.Getenv("BACKEND_JWT_SECRET")), nil
 		})
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
