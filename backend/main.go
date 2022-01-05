@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,7 +39,7 @@ func main() {
 	note_router.Use(JWTMiddleware())
 
 	// load env variables
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("../.env"); err != nil {
 		panic("Error loading .env file")
 	}
 	//connect to db
@@ -46,6 +47,10 @@ func main() {
 	if err != nil {
 		panic("failed to connect to database")
 	}
+
+	//connect to cache via gprc
+	cacheClient := getCacheClient()
+	fmt.Println(cacheClient)
 
 	note_router.GET("/", func(c *gin.Context) {
 		var notes []Note

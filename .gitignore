@@ -1,6 +1,7 @@
 *.db
 # dependencies
 frontend/node_modules
+cache/node_modules
 frontend/.pnp
 .pnp.js
 
