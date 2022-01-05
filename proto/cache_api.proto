@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package proto;
+option go_package="main/";
+
+service Cacher {
+  rpc Set (SetBody) returns (Response) {};
+  rpc Get (GetBody) returns (GetResponse) {};
+  rpc Clear (Empty) returns (Response) {};
+}
+
+message SetBody {
+  string key = 1;
+  string value = 2;
+}
+
+message Response {
+    string result = 1;
+}
+
+message GetBody {
+  string key = 1;
+}
+
+message GetResponse {
+    string value = 1;
+}
+
+message Empty {
+}
