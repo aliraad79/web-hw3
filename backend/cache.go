@@ -49,14 +49,20 @@ func clearCache(client CacherClient) {
 	fmt.Println(response)
 }
 
-func CreateCacheKey(note_id int) string {
-	return "note_" + strconv.FormatInt(int64(note_id), 10)
+func addNoteToCache(client CacherClient, note Note) {
+	str, _ := json.Marshal(note)
+	setInCache(client, "note_"+strconv.FormatInt(int64(note.ID), 10), string(str))
+}
+
+func addUserToCache(client CacherClient, user User) {
+	str, _ := json.Marshal(user)
+	setInCache(client, "user_"+user.Username, string(str))
 }
 
 func getNote(note_id int, db *gorm.DB, cacheClient CacherClient) (Note, error) {
 	var note Note
 
-	cacheKey := CreateCacheKey(note_id)
+	cacheKey := "note_" + strconv.FormatInt(int64(note_id), 10)
 	if result, cacheErr := getFromCache(cacheClient, cacheKey); cacheErr == nil && result != "" {
 		json.Unmarshal([]byte(result), &note)
 		return note, cacheErr
@@ -66,12 +72,24 @@ func getNote(note_id int, db *gorm.DB, cacheClient CacherClient) (Note, error) {
 		return Note{}, err.Error
 	}
 
-	str, _ := json.Marshal(note)
-	setInCache(cacheClient, cacheKey, string(str))
+	addNoteToCache(cacheClient, note)
 	return note, nil
 }
 
-func addToCache(client CacherClient, note Note) {
-	str, _ := json.Marshal(note)
-	setInCache(client, CreateCacheKey(int(note.ID)), string(str))
+func getUser(user_name string, db *gorm.DB, cacheClient CacherClient) (User, error) {
+
+	var user User
+
+	cacheKey := "user_" + user_name
+	if result, cacheErr := getFromCache(cacheClient, cacheKey); cacheErr == nil && result != "" {
+		json.Unmarshal([]byte(result), &user)
+		return user, cacheErr
+	}
+
+	if err := db.Where("username = ?", user_name).First(&user); err.Error != nil {
+		return User{}, err.Error
+	}
+
+	addUserToCache(cacheClient, user)
+	return user, nil
 }

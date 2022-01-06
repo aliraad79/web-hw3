@@ -76,7 +76,7 @@ func main() {
 		user_id, _ := c.Get("user_id")
 		note.UserID = int(user_id.(float64))
 		db.Create(&note)
-		addToCache(cacheClient, note)
+		addNoteToCache(cacheClient, note)
 		c.JSON(http.StatusOK, NoteToJSON(note))
 	})
 
@@ -147,10 +147,9 @@ func main() {
 			c.JSON(http.StatusUnprocessableEntity, "Invalid json provided")
 			return
 		}
-		var user User
-		e := db.Where("username = ?", u.Username).First(&user)
+		user, err := getUser(u.Username, db, cacheClient)
 
-		if e.Error != nil || u.Password != user.Password {
+		if err != nil || u.Password != user.Password {
 			c.JSON(http.StatusUnauthorized, gin.H{"Result": "Please provide valid login details"})
 			return
 		}
@@ -169,6 +168,7 @@ func main() {
 			return
 		}
 		db.Create(&user)
+		addUserToCache(cacheClient, user)
 		c.JSON(http.StatusOK, gin.H{"ID": user.ID})
 	})
 
