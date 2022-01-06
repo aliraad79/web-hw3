@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func getCacheClient() CacheServiceClient {
+func getCacheClient() CacherClient {
 
 	var conn *grpc.ClientConn
 	conn, err := grpc.Dial(":8060", grpc.WithInsecure())
@@ -27,24 +27,24 @@ func getCacheClient() CacheServiceClient {
 	return client
 }
 
-func getCacheKey(client CacheServiceClient, key string) {
-	response, err := client.GetKey(context.Background(), &Str{Val: key})
+func getCacheKey(client CacherClient, key string) {
+	response, err := client.Get(context.Background(), &GetBody{Key: key})
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println("response : ", response.GetVal())
+		fmt.Println("response : ", response.GetValue())
 	}
 }
 
-func setCacheKey(client CacheServiceClient, key string, value string) {
-	response, err := client.SetKey(context.Background(), &Cache{Key: key, Value: value})
+func setCacheKey(client CacherClient, key string, value string) {
+	response, err := client.Set(context.Background(), &SetBody{Key: key, Value: value})
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(response)
 }
 
-func clearCache(client CacheServiceClient) {
+func clearCache(client CacherClient) {
 	response, err := client.Clear(context.Background(), &Empty{})
 	if err != nil {
 		fmt.Println(err)

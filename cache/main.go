@@ -58,5 +58,6 @@ func main() {
 	}
 	s := grpc.NewServer()
 	RegisterCacherServer(s, New())
+	log.Println("Cache started at localhost:" + configuration.Port)
 	s.Serve(lis)
 }
