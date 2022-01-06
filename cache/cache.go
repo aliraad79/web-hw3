@@ -22,6 +22,7 @@ func initCache(maxCapacity int) Cache {
 }
 
 func (this *Cache) set(key, value string) {
+	fmt.Println("Set : " + key + value)
 	node_ptr, ok := this.storage[key]
 	if ok {
 		this.evictionAlgo.set_overwrite(node_ptr, value, this)
@@ -38,6 +39,8 @@ func (this *Cache) set(key, value string) {
 }
 
 func (this *Cache) get(key string) string {
+	fmt.Println("Get : " + key)
+
 	node_ptr, ok := this.storage[key]
 	if ok {
 		this.evictionAlgo.get(node_ptr, this)

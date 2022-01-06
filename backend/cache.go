@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 )
 
 func getCacheClient() CacherClient {
@@ -19,24 +21,21 @@ func getCacheClient() CacherClient {
 
 	client := NewCacherClient(conn)
 
-	getCacheKey(client, "ali")
-	setCacheKey(client, "ali", "test")
-	getCacheKey(client, "ali")
-	clearCache(client)
-
 	return client
 }
 
-func getCacheKey(client CacherClient, key string) {
+func getFromCache(client CacherClient, key string) (string, error) {
 	response, err := client.Get(context.Background(), &GetBody{Key: key})
 	if err != nil {
 		fmt.Println(err)
+		return response.GetValue(), err
 	} else {
-		fmt.Println("response : ", response.GetValue())
+		fmt.Println("Cache Get response : ", response.GetValue())
+		return response.GetValue(), nil
 	}
 }
 
-func setCacheKey(client CacherClient, key string, value string) {
+func setInCache(client CacherClient, key string, value string) {
 	response, err := client.Set(context.Background(), &SetBody{Key: key, Value: value})
 	if err != nil {
 		fmt.Println(err)
@@ -50,4 +49,23 @@ func clearCache(client CacherClient) {
 		fmt.Println(err)
 	}
 	fmt.Println(response)
+}
+
+func CreateCacheKey(note_id int) string {
+	return "note_" + strconv.FormatInt(int64(note_id), 10)
+}
+
+func getNote(note_id int, db *gorm.DB, cacheClient CacherClient) (string, error) {
+	var note Note
+
+	cacheKey := CreateCacheKey(note_id)
+	if result, cacheErr := getFromCache(cacheClient, cacheKey); cacheErr != nil {
+		return result, nil
+	}
+
+	if err := db.First(&note, note_id); err.Error != nil {
+		return "", err.Error
+	}
+	return "DB Success", nil
+
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -62,7 +63,7 @@ func main() {
 
 		for _, u := range notes {
 			if int(user_id.(float64)) == u.UserID || !is_admin.(bool) {
-				response = append(response, M{"Body": u.Body, "Title": u.Title, "id": u.ID})
+				response = append(response, NoteToJSON(u))
 			}
 		}
 		c.JSON(http.StatusOK, response)
@@ -81,20 +82,20 @@ func main() {
 	})
 
 	note_router.GET("/:note_id", func(c *gin.Context) {
-		note_id := c.Param("note_id")
-		var note Note
-		err := db.First(&note, note_id)
+		note_id, _ := strconv.Atoi(c.Param("note_id"))
+		note, err := getNote(note_id, db, cacheClient)
 
-		user_id, _ := c.Get("user_id")
-		is_admin, _ := c.Get("is_admin")
+		// user_id, _ := c.Get("user_id")
+		// is_admin, _ := c.Get("is_admin")
+		fmt.Println(note, err)
 
-		if err.Error != nil {
-			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
-			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
-		} else {
-			c.JSON(http.StatusOK, NoteToJSON(note))
-		}
+		// if err.Error != nil {
+		// 	c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		// } else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
+		// 	c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
+		// } else {
+		// 	c.JSON(http.StatusOK, NoteToJSON(note))
+		// }
 	})
 
 	note_router.DELETE("/:note_id", func(c *gin.Context) {
