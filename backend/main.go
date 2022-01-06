@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -51,7 +50,6 @@ func main() {
 
 	//connect to cache via gprc
 	cacheClient := getCacheClient()
-	fmt.Println(cacheClient)
 
 	note_router.GET("/", func(c *gin.Context) {
 		var notes []Note
@@ -78,6 +76,7 @@ func main() {
 		user_id, _ := c.Get("user_id")
 		note.UserID = int(user_id.(float64))
 		db.Create(&note)
+		addToCache(cacheClient, note)
 		c.JSON(http.StatusOK, NoteToJSON(note))
 	})
 
@@ -85,17 +84,16 @@ func main() {
 		note_id, _ := strconv.Atoi(c.Param("note_id"))
 		note, err := getNote(note_id, db, cacheClient)
 
-		// user_id, _ := c.Get("user_id")
-		// is_admin, _ := c.Get("is_admin")
-		fmt.Println(note, err)
+		user_id, _ := c.Get("user_id")
+		is_admin, _ := c.Get("is_admin")
 
-		// if err.Error != nil {
-		// 	c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		// } else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
-		// } else {
-		// 	c.JSON(http.StatusOK, NoteToJSON(note))
-		// }
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
+			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't see someone else note"})
+		} else {
+			c.JSON(http.StatusOK, NoteToJSON(note))
+		}
 	})
 
 	note_router.DELETE("/:note_id", func(c *gin.Context) {
