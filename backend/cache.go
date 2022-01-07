@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	"google.golang.org/grpc"
@@ -13,12 +14,16 @@ import (
 
 func getCacheClient() CacherClient {
 
-	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":8060", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %s", err)
+	tlsCredentials, tls_err := loadTLSCredentials()
+	if tls_err != nil {
+		log.Fatal("cannot load TLS credentials: ", tls_err)
 	}
-	// defer conn.Close()
+
+	var conn *grpc.ClientConn
+	conn, err := grpc.Dial(os.Getenv("CACHE_HOST")+":"+os.Getenv("CACHE_PORT"), grpc.WithTransportCredentials(tlsCredentials))
+	if err != nil {
+		log.Fatal("cannot dial server: ", err)
+	}
 
 	client := NewCacherClient(conn)
 
