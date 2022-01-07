@@ -2,9 +2,11 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"github.com/joho/godotenv"
 )
 
@@ -32,16 +34,25 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func main() {
+	// load env variables
+	if err := godotenv.Load(".env"); err != nil {
+		panic("Error loading .env file")
+	}
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 	note_router := router.Group("/notes")
 	note_router.Use(JWTMiddleware())
 
-	// load env variables
-	if err := godotenv.Load(".env"); err != nil {
-		panic("Error loading .env file")
-	}
+	// rate limit redis
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_HOST"),
+		Password: "",
+		DB:       0,
+	})
+
+	note_router.Use(RateLimiterMiddleware(redisClient))
+
 	//connect to db
 	db, err := initDB()
 	if err != nil {
@@ -170,6 +181,11 @@ func main() {
 		db.Create(&user)
 		addUserToCache(cacheClient, user)
 		c.JSON(http.StatusOK, gin.H{"ID": user.ID})
+	})
+
+	router.GET("/test", func(c *gin.Context) {
+		test_rate_limit()
+
 	})
 
 	router.Run(":8080")

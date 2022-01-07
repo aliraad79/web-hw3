@@ -7,7 +7,9 @@ using gin as web service and postgres as db
 Authentication and authorization on this app is via JWT
 
 ## cache
-Using a stand-alone go program for caching key 
+Using a stand-alone go program for caching key.<br />
+It is accessible via certs that created and runs securely on tls
+
 
 ## front end
 Using react 
