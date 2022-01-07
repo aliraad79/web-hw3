@@ -56,8 +56,15 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
-	RegisterCacherServer(s, New())
-	log.Println("Cache started at localhost:" + configuration.Port)
-	s.Serve(lis)
+
+	tlsCredentials, err := loadTLSCredentials()
+	if err != nil {
+		log.Fatal("cannot load TLS credentials: ", err)
+	}
+
+	grpcServer := grpc.NewServer(grpc.Creds(tlsCredentials))
+
+	RegisterCacherServer(grpcServer, New())
+	log.Println("Cache started in secure mode on localhost:" + configuration.Port)
+	grpcServer.Serve(lis)
 }
