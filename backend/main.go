@@ -39,7 +39,7 @@ func main() {
 	note_router.Use(JWTMiddleware())
 
 	// load env variables
-	if err := godotenv.Load("../.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		panic("Error loading .env file")
 	}
 	//connect to db
@@ -153,7 +153,7 @@ func main() {
 			c.JSON(http.StatusUnauthorized, gin.H{"Result": "Please provide valid login details"})
 			return
 		}
-		token, err := CreateToken(user.ID, user.is_admin)
+		token, err := CreateToken(user.ID, user.Is_admin)
 		if err != nil {
 			c.JSON(http.StatusUnprocessableEntity, err.Error())
 			return

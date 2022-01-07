@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -17,7 +19,7 @@ type User struct {
 	gorm.Model
 	Username string `json:"username"`
 	Password string `json:"password"`
-	is_admin bool   `json:"is_admin"`
+	Is_admin bool   `json:"is_admin"`
 }
 
 func initDB() (*gorm.DB, error) {
@@ -25,7 +27,10 @@ func initDB() (*gorm.DB, error) {
 	// for docker
 	// dsn := "host=db user=postgres password=postgres dbname=docker port=5432 sslmode=disable"
 	// for localhost
-	dsn := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
+	dsn := "host=" + os.Getenv("DB_HOST") + " user=" + os.Getenv("DB_USERNAME") +
+		" password=" + os.Getenv("DB_PASSWORD") + " dbname=" + os.Getenv("DB_NAME") +
+		" port=" + os.Getenv("DB_PORT") + " sslmode=disable"
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	// Migrate the schema
