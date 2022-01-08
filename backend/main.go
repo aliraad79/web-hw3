@@ -14,6 +14,12 @@ const BEARER_SCHEMA = "Bearer "
 
 type M map[string]interface{}
 
+type SignUpInfo struct {
+	Username     string `json:"username" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	SecretPhrase string `json:"secret_phrase"`
+}
+
 func NoteToJSON(note Note) map[string]interface{} {
 	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "userID": note.UserID}
 }
@@ -174,11 +180,12 @@ func main() {
 	})
 
 	router.POST("/signup", func(c *gin.Context) {
-		var user User
-		if err := c.ShouldBindJSON(&user); err != nil {
+		var input SignUpInfo
+		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameters"})
 			return
 		}
+		user := User{Username: input.Username, Password: input.Password, Is_admin: input.SecretPhrase == os.Getenv("SECRET_ADMIN_PHRASE")}
 		db.Create(&user)
 		addUserToCache(cacheClient, user)
 		c.JSON(http.StatusOK, gin.H{"ID": user.ID})
