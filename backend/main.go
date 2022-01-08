@@ -108,18 +108,19 @@ func main() {
 	})
 
 	note_router.DELETE("/:note_id", func(c *gin.Context) {
-		note_id := c.Param("note_id")
+		note_id, _ := strconv.Atoi(c.Param("note_id"))
 		var note Note
 
 		user_id, _ := c.Get("user_id")
 		is_admin, _ := c.Get("is_admin")
 
-		err := db.Delete(&note, note_id)
-		if err.Error != nil {
+		verified_note, err := getNote(note_id, db, cacheClient)
+		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
-		} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
+		} else if !(verified_note.UserID == int(user_id.(float64)) || is_admin.(bool)) {
 			c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't delete someone else note"})
 		} else {
+			db.Delete(&note, note_id)
 			c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
 		}
 	})
