@@ -19,7 +19,10 @@ const Notes = (props) => {
         },
       })
         .then((response) => {
-          if (response.status === 401) navigate("/");
+          if (response.status === 401) {
+            localStorage.token = "";
+            navigate("/");
+          }
           if (response.status === 200) return response.json();
         })
         .then((response) => {
