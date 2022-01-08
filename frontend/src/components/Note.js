@@ -10,7 +10,9 @@ const Note = ({ note, onDelete, onUpdateOrAdd }) => {
   const [accept, setAccept] = useState(empty_note);
 
   return (
-    <Container className="bg-info">
+    <Container className="" style={{
+      backgroundImage: "linear-gradient(to left, #616161, #9bc5c3)",
+    }}>
       <br />
       <Form>
         <Row>
