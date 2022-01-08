@@ -48,10 +48,16 @@ const Login = () => {
   ) : (
     <>
       <MyNavbar />
+      <br />
       <Container>
         <Row>
           <Col></Col>
-          <Col>
+          <Col xs={6}><h2>Sign Up</h2></Col>
+          <Col></Col>
+        </Row>
+        <Row>
+          <Col></Col>
+          <Col xs={6}>
             <Form onSubmit={signup_user}>
               <FloatingLabel label="Username">
                 <Form.Control

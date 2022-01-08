@@ -48,36 +48,50 @@ const Login = () => {
   ) : (
     <>
       <MyNavbar />
+      <br />
       <Container>
+      <Row>
+          <Col></Col>
+          <Col xs={6}><h2>Login</h2></Col>
+          <Col></Col>
+        </Row>
         <Row>
           <Col></Col>
-          <Col>
-            <Form onSubmit={login_user}>
-              <FloatingLabel label="Username">
-                <Form.Control
-                  type="username"
-                  placeholder="username"
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                  }}
-                />
-              </FloatingLabel>
+          <Col xs={6}>
+            <div
+              style={{
+                boxShadow: "5px 5px 2px #9E9E9E",
+                border: "4px solid #77f799",
+                fontWeight: "550",
+              }}
+            >
+              <Form onSubmit={login_user}>
+                <FloatingLabel label="Username">
+                  <Form.Control
+                    type="username"
+                    placeholder="username"
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                    }}
+                  />
+                </FloatingLabel>
 
-              <FloatingLabel label="Password">
-                <Form.Control
-                  type="password"
-                  placeholder="Password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                />
-              </FloatingLabel>
-              <center>
-                <Button variant="primary" type="submit">
-                  Login
-                </Button>
-              </center>
-            </Form>
+                <FloatingLabel label="Password">
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                    }}
+                  />
+                </FloatingLabel>
+                <center>
+                  <Button variant="primary" type="submit">
+                    Login
+                  </Button>
+                </center>
+              </Form>
+            </div>
           </Col>
           <Col></Col>
         </Row>
