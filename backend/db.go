@@ -12,7 +12,6 @@ type Note struct {
 	Title  string `json:"Title" binding:"required"`
 	Body   string `json:"Body" binding:"required"`
 	UserID int
-	User   User `json:"owner" binding:"required"`
 }
 
 type User struct {

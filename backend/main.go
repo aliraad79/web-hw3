@@ -15,7 +15,7 @@ const BEARER_SCHEMA = "Bearer "
 type M map[string]interface{}
 
 func NoteToJSON(note Note) map[string]interface{} {
-	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "owner": note.UserID}
+	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "userID": note.UserID}
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -71,7 +71,7 @@ func main() {
 		is_admin, _ := c.Get("is_admin")
 
 		for _, u := range notes {
-			if int(user_id.(float64)) == u.UserID || !is_admin.(bool) {
+			if int(user_id.(float64)) == u.UserID || is_admin.(bool) {
 				response = append(response, NoteToJSON(u))
 			}
 		}
@@ -81,7 +81,7 @@ func main() {
 	note_router.POST("/", func(c *gin.Context) {
 		var note Note
 		if err := c.ShouldBindJSON(&note); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": err})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad json"})
 			return
 		}
 		user_id, _ := c.Get("user_id")
