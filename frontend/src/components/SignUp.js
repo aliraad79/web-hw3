@@ -1,7 +1,6 @@
 import {
   Form,
   Button,
-  Modal,
   FloatingLabel,
   Container,
   Row,
@@ -11,13 +10,15 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
+import MyModal from "./MyModal";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showModalError, setShowModalError] = useState(false);
+  const [adminSecret, setadminSecret] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [adminMode, setAdminMode] = useState(false);
 
-  const handleClose = () => setShowModalError(false);
   const navigate = useNavigate();
 
   const signup_user = async (event) => {
@@ -25,16 +26,17 @@ const Login = () => {
     await fetch(`${BASE_SERVER_URL}/signup`, {
       method: "POST",
       body: JSON.stringify({
-        username: username,
-        password: password,
-        is_admin: false,
+        username,
+        password,
+        secret_phrase: adminSecret,
       }),
     })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
         } else {
-          setShowModalError(true);
+          setShowErrorModal(true);
+          return;
         }
       })
       .then((response) => {
@@ -52,52 +54,79 @@ const Login = () => {
       <Container>
         <Row>
           <Col></Col>
-          <Col xs={6}><h2>Sign Up</h2></Col>
+          <Col xs={6}>
+            <h2>Sign Up</h2>
+          </Col>
           <Col></Col>
         </Row>
         <Row>
           <Col></Col>
           <Col xs={6}>
-            <Form onSubmit={signup_user}>
-              <FloatingLabel label="Username">
-                <Form.Control
-                  type="username"
-                  placeholder="username"
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                  }}
-                />
-              </FloatingLabel>
+            <div
+              style={{
+                boxShadow: "5px 5px 2px #9E9E9E",
+                border: "6px solid",
+                borderColor: "#9bc5c3 #616161 #616161 #9bc5c3",
+                fontWeight: "550",
+              }}
+            >
+              <Form onSubmit={signup_user}>
+                <FloatingLabel label="Username">
+                  <Form.Control
+                    type="username"
+                    placeholder="username"
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                    }}
+                  />
+                </FloatingLabel>
 
-              <FloatingLabel label="Password">
-                <Form.Control
-                  type="password"
-                  placeholder="Password"
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                />
-              </FloatingLabel>
-              <center>
-                <Button variant="primary" type="submit">
-                  Sign UP
-                </Button>
-              </center>
-            </Form>
+                <FloatingLabel label="Password">
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                    }}
+                  />
+                </FloatingLabel>
+                {adminMode && (
+                  <FloatingLabel label="Admins Secret">
+                    <Form.Control
+                      type="password"
+                      onChange={(e) => {
+                        setadminSecret(e.target.value);
+                      }}
+                    />
+                  </FloatingLabel>
+                )}
+                <Row>
+                  <Col></Col>
+                  <Col>
+                    <Button variant="info" type="submit">
+                      Sign UP
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      variant="light"
+                      onClick={(e) => {
+                        setAdminMode(!adminMode);
+                      }}
+                    >
+                      Admin signup
+                    </Button>
+                  </Col>
+                </Row>
+              </Form>
+            </div>
           </Col>
           <Col></Col>
         </Row>
-        <Modal show={showModalError} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Sign up Error</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Username or password is incorrect</Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={handleClose}>
-              OK
-            </Button>
-          </Modal.Footer>
-        </Modal>
+
+        {showErrorModal && (
+          <MyModal text="Username or password is incorrect" title="Error" />
+        )}
       </Container>
     </>
   );
