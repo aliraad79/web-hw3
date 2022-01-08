@@ -77,8 +77,6 @@ const Notes = (props) => {
     );
   });
 
-  console.log(notes);
-
   return !token || token === "" ? (
     <Navigate to={{ pathname: "/" }} />
   ) : (
