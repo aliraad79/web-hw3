@@ -86,7 +86,7 @@ const Notes = (props) => {
     <>
       <MyNavbar />
       <center>
-        <br />
+        <h1>Notes</h1>
         {notesItems}
         <Button
           onClick={(e) =>
