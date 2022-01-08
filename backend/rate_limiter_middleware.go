@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+
+	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
 func RateLimiterMiddleware(redisClient *redis.Client) gin.HandlerFunc {
@@ -43,4 +45,23 @@ func RateLimiterMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 		redisClient.Expire(userCntKey, slidingWindow)
 	}
 
+}
+
+func test_rate_limit() {
+	rate := vegeta.Rate{Freq: 20, Per: time.Second}
+	duration := 60 * time.Second
+	targeter := vegeta.NewStaticTargeter(vegeta.Target{
+		Method: "GET",
+		URL:    "http://localhost:8080/notes/5",
+		Header: http.Header{"Authorization": {"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NDE2MzE2NzEsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6MTB9.IVe-c7Mxfen2NDL7UM61VyB1hojWHMzJ897nGGWT8yw"}},
+	})
+	attacker := vegeta.NewAttacker()
+
+	var metrics vegeta.Metrics
+	for res := range attacker.Attack(targeter, rate, duration, "Big Bang!") {
+		metrics.Add(res)
+	}
+	metrics.Close()
+
+	fmt.Printf("99th percentile: %s\n", metrics.Latencies.P99)
 }
