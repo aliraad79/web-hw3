@@ -175,7 +175,7 @@ func main() {
 	router.POST("/signup", func(c *gin.Context) {
 		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameters"})
 			return
 		}
 		db.Create(&user)
@@ -185,7 +185,6 @@ func main() {
 
 	router.GET("/test", func(c *gin.Context) {
 		test_rate_limit()
-
 	})
 
 	router.Run(":8080")

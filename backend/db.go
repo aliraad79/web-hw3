@@ -17,8 +17,8 @@ type Note struct {
 
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 	Is_admin bool   `json:"is_admin"`
 }
 
