@@ -21,7 +21,7 @@ type User struct {
 	Is_admin bool   `json:"is_admin"`
 }
 
-func initDB() (*gorm.DB, error) {
+func initDB() gorm.DB {
 
 	// for docker
 	// dsn := "host=db user=postgres password=postgres dbname=docker port=5432 sslmode=disable"
@@ -32,8 +32,12 @@ func initDB() (*gorm.DB, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	if err != nil {
+		panic("failed to connect to database")
+	}
+
 	// Migrate the schema
 	db.AutoMigrate(&Note{})
 	db.AutoMigrate(&User{})
-	return db, err
+	return *db
 }
