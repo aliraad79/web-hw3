@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type M map[string]interface{}
+
+func NoteToJSON(note Note) map[string]interface{} {
+	return gin.H{"ID": note.ID, "title": note.Title, "body": note.Body, "userID": note.UserID}
+}
+
 func updateNote(c *gin.Context) {
 	var new_note Note
 	var note Note
