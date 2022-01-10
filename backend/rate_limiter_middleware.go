@@ -63,5 +63,7 @@ func test_rate_limit(token string) {
 	}
 	metrics.Close()
 
-	fmt.Printf("99th percentile: %s\n", metrics.Latencies.P99)
+	fmt.Printf("Status codes: %v\n", metrics.StatusCodes)
+	fmt.Printf("Must have 100 or less 200 and 500 or more 500\n")
+
 }
