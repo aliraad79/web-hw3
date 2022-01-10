@@ -47,13 +47,13 @@ func RateLimiterMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 
 }
 
-func test_rate_limit() {
-	rate := vegeta.Rate{Freq: 20, Per: time.Second}
+func test_rate_limit(token string) {
+	rate := vegeta.Rate{Freq: 10, Per: time.Second}
 	duration := 60 * time.Second
 	targeter := vegeta.NewStaticTargeter(vegeta.Target{
 		Method: "GET",
-		URL:    "http://localhost:8080/notes/5",
-		Header: http.Header{"Authorization": {"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2NDE2MzE2NzEsImlzX2FkbWluIjpmYWxzZSwidXNlcl9pZCI6MTB9.IVe-c7Mxfen2NDL7UM61VyB1hojWHMzJ897nGGWT8yw"}},
+		URL:    "http://localhost:8080/notes",
+		Header: http.Header{"Authorization": {token}},
 	})
 	attacker := vegeta.NewAttacker()
 
