@@ -8,6 +8,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: web3
+      POSTGRES_DB: postgres
     ports:
       - "8090:5432"
