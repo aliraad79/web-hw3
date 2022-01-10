@@ -67,7 +67,7 @@ func login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"Result": "Please provide valid login details"})
 		return
 	}
-	token, err := CreateToken(user.ID, user.Is_admin)
+	token, err := CreateJWTToken(user.ID, user.Is_admin)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 		return

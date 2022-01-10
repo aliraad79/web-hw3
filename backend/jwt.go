@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateToken(userid uint, is_admin bool) (string, error) {
+func CreateJWTToken(userid uint, is_admin bool) (string, error) {
 	var err error
 	//Creating Access Token
 	atClaims := jwt.MapClaims{}
