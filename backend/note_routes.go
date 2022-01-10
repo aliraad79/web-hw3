@@ -25,6 +25,7 @@ func updateNote(c *gin.Context) {
 	} else if note.UserID != int(user_id.(float64)) && !is_admin.(bool) {
 		c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't update someone else note"})
 	} else {
+		clearCache()
 		if new_note.Title != "" {
 			object.Update("Title", new_note.Title)
 		}
@@ -49,6 +50,7 @@ func deleteNote(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"Error": "You can't delete someone else note"})
 	} else {
 		db.Delete(&note, note_id)
+		clearCache()
 		c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
 	}
 }
