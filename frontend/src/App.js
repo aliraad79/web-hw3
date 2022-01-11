@@ -6,13 +6,17 @@ import Login from "./components/Login";
 import Notes from "./components/Notes";
 import Signout from "./components/Signout";
 import SignUp from "./components/SignUp";
+import SESSION_AGE_IN_HOURS from "./consts";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   const [cookies, setCookie] = useCookies(["authToken"]);
+  const current = new Date();
+  const expireDate = new Date();
+  expireDate.setHours(current.getHours() + SESSION_AGE_IN_HOURS);
 
   const setAuthToken = (token) => {
-    setCookie("authToken", `${token}`, { maxAge: 60 * 60 });
+    setCookie("authToken", `${token}`, { expires: expireDate });
   };
 
   const getAuthToken = () => {
