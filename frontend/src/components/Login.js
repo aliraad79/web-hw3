@@ -12,7 +12,7 @@ import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
 import MyModal from "./MyModal";
 
-const Login = () => {
+const Login = ({ setAuthToken, getAuthToken }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showModalError, setShowModalError] = useState(false);
@@ -36,17 +36,17 @@ const Login = () => {
         }
       })
       .then((response) => {
-        localStorage.setItem("token", `${response.token}`);
+        setAuthToken(`${response.token}`);
         navigate("/notes", { replace: true });
       });
   };
 
-  const token = localStorage.token;
+  const token = getAuthToken();
   return token ? (
     <Navigate to={{ pathname: "/notes" }} />
   ) : (
     <>
-      <MyNavbar />
+      <MyNavbar getAuthToken={getAuthToken}/>
       <br />
       <Container>
         <Row>

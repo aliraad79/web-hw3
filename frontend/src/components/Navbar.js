@@ -1,7 +1,7 @@
 import { Container, Navbar, Nav } from "react-bootstrap";
 
-const MyNavbar = () => {
-  const token = localStorage.token;
+const MyNavbar = ({ getAuthToken }) => {
+  const token = getAuthToken();
   return (
     <>
       <Navbar bg="dark" variant="dark">

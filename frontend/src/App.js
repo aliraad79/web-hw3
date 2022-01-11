@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 import Login from "./components/Login";
 import Notes from "./components/Notes";
@@ -8,13 +9,39 @@ import SignUp from "./components/SignUp";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
+  const [cookies, setCookie] = useCookies(["authToken"]);
+
+  const setAuthToken = (token) => {
+    setCookie("authToken", `${token}`, { maxAge: 60 * 60 });
+  };
+
+  const getAuthToken = () => {
+    return cookies.authToken;
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/notes" element={<Notes />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signout" element={<Signout />} />
+        <Route
+          path="/"
+          element={
+            <Login setAuthToken={setAuthToken} getAuthToken={getAuthToken} />
+          }
+        />
+        <Route
+          path="/notes"
+          element={
+            <Notes setAuthToken={setAuthToken} getAuthToken={getAuthToken} />
+          }
+        />
+        <Route
+          path="/signup"
+          element={<SignUp getAuthToken={getAuthToken} />}
+        />
+        <Route
+          path="/signout"
+          element={<Signout setAuthToken={setAuthToken} />}
+        />
       </Routes>
     </Router>
   );

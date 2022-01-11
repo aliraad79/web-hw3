@@ -6,10 +6,10 @@ import Note from "./Note";
 import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
 
-const Notes = (props) => {
+const Notes = ({ setAuthToken, getAuthToken }) => {
   const [notes, setNotes] = useState([]);
   let navigate = useNavigate();
-  const token = localStorage.token;
+  const token = getAuthToken();
 
   useEffect(() => {
     const getNotes = async () => {
@@ -20,7 +20,7 @@ const Notes = (props) => {
       })
         .then((response) => {
           if (response.status === 401) {
-            localStorage.token = "";
+            setAuthToken("");
             navigate("/");
           }
           if (response.status === 200) return response.json();
@@ -84,7 +84,7 @@ const Notes = (props) => {
     <Navigate to={{ pathname: "/" }} />
   ) : (
     <>
-      <MyNavbar />
+      <MyNavbar getAuthToken={getAuthToken}/>
       <center>
         <h1>Notes</h1>
         {notesItems}

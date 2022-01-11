@@ -12,7 +12,7 @@ import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
 import MyModal from "./MyModal";
 
-const Login = () => {
+const SignUp = ({ getAuthToken }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [adminSecret, setadminSecret] = useState("");
@@ -44,12 +44,12 @@ const Login = () => {
       });
   };
 
-  const token = localStorage.token;
+  const token = getAuthToken();
   return token ? (
     <Navigate to={{ pathname: "/notes" }} />
   ) : (
     <>
-      <MyNavbar />
+      <MyNavbar getAuthToken={getAuthToken} />
       <br />
       <Container>
         <Row>
@@ -132,4 +132,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;

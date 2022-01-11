@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
 
-const Signout = () => {
-  localStorage.token = "";
-  return <Navigate to={{ pathname: "/notes" }} />;
+const Signout = ({ setAuthToken }) => {
+  setAuthToken("");
+  return <Navigate to={{ pathname: "/" }} />;
 };
 
 export default Signout;
