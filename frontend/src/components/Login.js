@@ -8,7 +8,7 @@ import {
 } from "react-bootstrap";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import BASE_SERVER_URL from "../consts";
+import {BASE_SERVER_URL} from "../consts";
 import MyNavbar from "./Navbar";
 import MyModal from "./MyModal";
 
@@ -46,7 +46,7 @@ const Login = ({ setAuthToken, getAuthToken }) => {
     <Navigate to={{ pathname: "/notes" }} />
   ) : (
     <>
-      <MyNavbar getAuthToken={getAuthToken}/>
+      <MyNavbar getAuthToken={getAuthToken} />
       <br />
       <Container>
         <Row>

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "react-bootstrap";
 import Note from "./Note";
-import BASE_SERVER_URL from "../consts";
+import {BASE_SERVER_URL} from "../consts";
 import MyNavbar from "./Navbar";
 
 const Notes = ({ setAuthToken, getAuthToken }) => {

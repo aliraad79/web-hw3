@@ -6,7 +6,7 @@ import Login from "./components/Login";
 import Notes from "./components/Notes";
 import Signout from "./components/Signout";
 import SignUp from "./components/SignUp";
-import SESSION_AGE_IN_HOURS from "./consts";
+import { SESSION_AGE_IN_HOURS } from "./consts";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
