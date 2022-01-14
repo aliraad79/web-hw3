@@ -8,7 +8,7 @@ import {
 } from "react-bootstrap";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import consts from "../consts";
+import {BASE_SERVER_URL} from "../consts";
 import MyNavbar from "./Navbar";
 import MyModal from "./MyModal";
 
@@ -23,7 +23,7 @@ const SignUp = ({ getAuthToken }) => {
 
   const signup_user = async (event) => {
     event.preventDefault();
-    await fetch(`${consts.BASE_SERVER_URL}/signup`, {
+    await fetch(`${BASE_SERVER_URL}/signup`, {
       method: "POST",
       body: JSON.stringify({
         username,
