@@ -1,38 +1,43 @@
 version: '3.9'
 
 services:
-  # redis:
-  #   image: redis:6-alpine
-  #   ports:
-  #     - 6379:6379
+  redis:
+    image: redis:6-alpine
+    ports:
+      - 6379:6379
   
   db:
     image: postgres
-    restart: always
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=docker
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
     ports:
-      - "8090:5432"
+      - "6432:5432"
 
-  react:
-    container_name: frontend
-    build: ./frontend
+  webapp:
+    build:
+      context: "."
+      dockerfile: Dockerfile.backend
+    command: "go run ."
     ports:
-      - 3000:3000
-    command: npm start
+      - 8080-8083:8080
     depends_on:
       - db
   
-  go:
-    container_name: backend
-    image: golang:1.17-alpine
-    command: sh -c "go get && go run *.go"
+  cache:
+    build:
+      context: "."
+      dockerfile: Dockerfile.cache
+    command: "go run ."
     ports:
-      - 8080:8080
-    working_dir: /app/backend
+      - 6380:6379
+
+  nginx:
+    image: nginx:1.17.10-alpine
     volumes:
-      - ./:/app
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"
     depends_on:
-      - db
+      - webapp

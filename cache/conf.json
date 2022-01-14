@@ -1,4 +1,4 @@
 {
-    "Capacity": 3,
-    "Port": "8060"
+    "Capacity": 10,
+    "Port": "6379"
 }
