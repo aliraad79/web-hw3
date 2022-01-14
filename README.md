@@ -14,5 +14,6 @@ It is accessible via certs that created and runs securely on tls
 ## front end
 Using react 
 
-# Third homework for sharif web course
-Ali Ahmadi
+## Third homework for sharif web course
+Ali Ahmadi <br />
+Hamed Abedi
