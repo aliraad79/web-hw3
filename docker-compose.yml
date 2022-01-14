@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile.cache
     command: "go run ."
     ports:
-      - 6380:6379
+      - 6380:6380
 
   nginx:
     image: nginx:1.17.10-alpine
@@ -41,3 +41,11 @@ services:
       - "80:80"
     depends_on:
       - webapp
+  
+  frontend:
+    build:
+      context: "."
+      dockerfile: Dockerfile.frontend
+    command: [ "npm", "start" ]
+    ports:
+      - 3000:3000

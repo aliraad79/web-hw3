@@ -52,7 +52,7 @@ func test_rate_limit(token string) {
 	duration := 60 * time.Second
 	targeter := vegeta.NewStaticTargeter(vegeta.Target{
 		Method: "GET",
-		URL:    "http://localhost:8080/notes",
+		URL:    "http://localhost:8080/backend/notes",
 		Header: http.Header{"Authorization": {token}},
 	})
 	attacker := vegeta.NewAttacker()

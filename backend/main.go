@@ -51,10 +51,10 @@ func main() {
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	router.POST("/login", login)
-	router.POST("/signup", singup)
+	router.POST("/backend/login", login)
+	router.POST("/backend/signup", singup)
 
-	note_router := router.Group("/notes")
+	note_router := router.Group("/backend/notes")
 	note_router.Use(JWTMiddleware())
 	note_router.Use(RateLimiterMiddleware(redisClient))
 

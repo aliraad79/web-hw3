@@ -52,7 +52,7 @@ func main() {
 		fmt.Println("error:", err)
 	}
 	cache = initCache(configuration.Capacity)
-	lis, err := net.Listen("tcp", "localhost:"+configuration.Port)
+	lis, err := net.Listen("tcp", "0.0.0.0:"+configuration.Port)
 	if err != nil {
 		log.Fatal("failed to listen: %v", err)
 	}
@@ -65,6 +65,6 @@ func main() {
 	grpcServer := grpc.NewServer(grpc.Creds(tlsCredentials))
 
 	RegisterCacherServer(grpcServer, New())
-	log.Println("Cache started in secure mode on localhost:" + configuration.Port)
+	log.Println("Cache started in secure mode on 0.0.0.0:" + configuration.Port)
 	grpcServer.Serve(lis)
 }
