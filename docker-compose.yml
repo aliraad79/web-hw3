@@ -41,3 +41,11 @@ services:
       - "80:80"
     depends_on:
       - webapp
+  
+  frontend:
+    build:
+      context: "."
+      dockerfile: Dockerfile.frontend
+    command: [ "npm", "start" ]
+    ports:
+      - 3000:3000

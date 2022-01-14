@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "react-bootstrap";
 import Note from "./Note";
-import BASE_SERVER_URL from "../consts";
+import consts from "../consts";
 import MyNavbar from "./Navbar";
 
 const Notes = ({ setAuthToken, getAuthToken }) => {
@@ -13,7 +13,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
 
   useEffect(() => {
     const getNotes = async () => {
-      await fetch(`${BASE_SERVER_URL}/notes/`, {
+      await fetch(`${consts.BASE_SERVER_URL}/notes/`, {
         headers: {
           Authorization: token,
         },
@@ -33,7 +33,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
   }, []);
 
   const onDelete = (id) => {
-    fetch(`${BASE_SERVER_URL}/notes/${id}`, {
+    fetch(`${consts.BASE_SERVER_URL}/notes/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: token,
@@ -44,7 +44,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
 
   const updateOrAddNote = async (note) => {
     if (note.ID === 0) {
-      fetch(`${BASE_SERVER_URL}/notes/`, {
+      fetch(`${consts.BASE_SERVER_URL}/notes/`, {
         method: "POST",
         headers: {
           Authorization: token,
@@ -59,7 +59,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
           ])
         );
     } else {
-      await fetch(`${BASE_SERVER_URL}/notes/${note.ID}`, {
+      await fetch(`${consts.BASE_SERVER_URL}/notes/${note.ID}`, {
         method: "PUT",
         headers: {
           Authorization: token,
