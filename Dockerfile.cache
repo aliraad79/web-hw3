@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.17-alpine
+
+WORKDIR cache
+
+ADD cert .
+ADD cache .
+
+RUN go get
+
