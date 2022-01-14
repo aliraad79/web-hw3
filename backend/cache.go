@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 )
 
 func getCacheClient() CacherClient {
@@ -25,13 +24,11 @@ func getCacheClient() CacherClient {
 		log.Fatal("cannot dial server: ", err)
 	}
 
-	client := NewCacherClient(conn)
-
-	return client
+	return NewCacherClient(conn)
 }
 
-func getFromCache(client CacherClient, key string) (string, error) {
-	response, err := client.Get(context.Background(), &GetBody{Key: key})
+func getFromCache(key string) (string, error) {
+	response, err := cacheClient.Get(context.Background(), &GetBody{Key: key})
 	if err != nil || response.GetValue() == "" {
 		return response.GetValue(), err
 	} else {
@@ -39,36 +36,36 @@ func getFromCache(client CacherClient, key string) (string, error) {
 	}
 }
 
-func setInCache(client CacherClient, key string, value string) {
-	_, err := client.Set(context.Background(), &SetBody{Key: key, Value: value})
+func setInCache(key string, value string) {
+	_, err := cacheClient.Set(context.Background(), &SetBody{Key: key, Value: value})
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func clearCache(client CacherClient) {
-	response, err := client.Clear(context.Background(), &Empty{})
+func clearCache() {
+	response, err := cacheClient.Clear(context.Background(), &Empty{})
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(response)
 }
 
-func addNoteToCache(client CacherClient, note Note) {
+func addNoteToCache(note Note) {
 	str, _ := json.Marshal(note)
-	setInCache(client, "note_"+strconv.FormatInt(int64(note.ID), 10), string(str))
+	setInCache("note_"+strconv.FormatInt(int64(note.ID), 10), string(str))
 }
 
-func addUserToCache(client CacherClient, user User) {
+func addUserToCache(user User) {
 	str, _ := json.Marshal(user)
-	setInCache(client, "user_"+user.Username, string(str))
+	setInCache("user_"+user.Username, string(str))
 }
 
-func getNote(note_id int, db *gorm.DB, cacheClient CacherClient) (Note, error) {
+func getNote(note_id int) (Note, error) {
 	var note Note
 
 	cacheKey := "note_" + strconv.FormatInt(int64(note_id), 10)
-	if result, cacheErr := getFromCache(cacheClient, cacheKey); cacheErr == nil && result != "" {
+	if result, cacheErr := getFromCache(cacheKey); cacheErr == nil && result != "" {
 		json.Unmarshal([]byte(result), &note)
 		return note, cacheErr
 	}
@@ -77,16 +74,16 @@ func getNote(note_id int, db *gorm.DB, cacheClient CacherClient) (Note, error) {
 		return Note{}, err.Error
 	}
 
-	addNoteToCache(cacheClient, note)
+	addNoteToCache(note)
 	return note, nil
 }
 
-func getUser(user_name string, db *gorm.DB, cacheClient CacherClient) (User, error) {
+func getUser(user_name string) (User, error) {
 
 	var user User
 
 	cacheKey := "user_" + user_name
-	if result, cacheErr := getFromCache(cacheClient, cacheKey); cacheErr == nil && result != "" {
+	if result, cacheErr := getFromCache(cacheKey); cacheErr == nil && result != "" {
 		json.Unmarshal([]byte(result), &user)
 		return user, cacheErr
 	}
@@ -95,6 +92,6 @@ func getUser(user_name string, db *gorm.DB, cacheClient CacherClient) (User, err
 		return User{}, err.Error
 	}
 
-	addUserToCache(cacheClient, user)
+	addUserToCache(user)
 	return user, nil
 }

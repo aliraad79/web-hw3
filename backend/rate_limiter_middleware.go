@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+
+	vegeta "github.com/tsenart/vegeta/v12/lib"
 )
 
 func RateLimiterMiddleware(redisClient *redis.Client) gin.HandlerFunc {
@@ -42,5 +44,26 @@ func RateLimiterMiddleware(redisClient *redis.Client) gin.HandlerFunc {
 		redisClient.ZAddNX(userCntKey, redis.Z{Score: float64(now), Member: float64(now)})
 		redisClient.Expire(userCntKey, slidingWindow)
 	}
+
+}
+
+func test_rate_limit(token string) {
+	rate := vegeta.Rate{Freq: 10, Per: time.Second}
+	duration := 60 * time.Second
+	targeter := vegeta.NewStaticTargeter(vegeta.Target{
+		Method: "GET",
+		URL:    "http://localhost:8080/notes",
+		Header: http.Header{"Authorization": {token}},
+	})
+	attacker := vegeta.NewAttacker()
+
+	var metrics vegeta.Metrics
+	for res := range attacker.Attack(targeter, rate, duration, "Big Bang!") {
+		metrics.Add(res)
+	}
+	metrics.Close()
+
+	fmt.Printf("Status codes: %v\n", metrics.StatusCodes)
+	fmt.Printf("Must have 100 or less 200 and 500 or more 500\n")
 
 }

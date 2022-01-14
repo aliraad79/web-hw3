@@ -3,14 +3,16 @@ import { useState } from "react";
 import { FaTrash, FaPencilAlt, FaCheckCircle } from "react-icons/fa";
 
 const Note = ({ note, onDelete, onUpdateOrAdd }) => {
-  let empty_note = note.id === 0;
-  const [title, setTitle] = useState(note.Title);
-  const [body, setBody] = useState(note.Body);
+  let empty_note = note.ID === 0;
+  const [title, setTitle] = useState(note.title);
+  const [body, setBody] = useState(note.body);
   const [editMode, setEditMode] = useState(!empty_note);
   const [accept, setAccept] = useState(empty_note);
 
   return (
-    <Container className="bg-info">
+    <Container className="" style={{
+      backgroundImage: "linear-gradient(to left, #616161, #9bc5c3)",
+    }}>
       <br />
       <Form>
         <Row>
@@ -26,7 +28,7 @@ const Note = ({ note, onDelete, onUpdateOrAdd }) => {
             />
           </Col>
           <Col>
-            <Button onClick={(e) => onDelete(note.id)}>
+            <Button onClick={(e) => onDelete(note.ID)}>
               <FaTrash />
             </Button>
             <Button
@@ -42,7 +44,7 @@ const Note = ({ note, onDelete, onUpdateOrAdd }) => {
                 onClick={(e) => {
                   setEditMode(!editMode);
                   setAccept(editMode);
-                  onUpdateOrAdd({ id: note.id, Title: title, Body: body });
+                  onUpdateOrAdd({ ID: note.ID, Title: title, Body: body });
                 }}
               >
                 <FaCheckCircle />

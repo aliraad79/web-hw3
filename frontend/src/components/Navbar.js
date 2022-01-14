@@ -1,7 +1,7 @@
 import { Container, Navbar, Nav } from "react-bootstrap";
 
-const MyNavbar = () => {
-  const token = localStorage.token;
+const MyNavbar = ({ getAuthToken }) => {
+  const token = getAuthToken();
   return (
     <>
       <Navbar bg="dark" variant="dark">
@@ -15,13 +15,15 @@ const MyNavbar = () => {
                   <Nav.Link href="/signout">Sign Out</Nav.Link>
                 </>
               ) : (
-                <Nav.Link href="/">Sign In</Nav.Link>
+                <>
+                  <Nav.Link href="/signup">Sign Up</Nav.Link>
+                  <Nav.Link href="/">Login</Nav.Link>
+                </>
               )}
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      ;
     </>
   );
 };

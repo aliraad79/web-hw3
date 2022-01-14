@@ -6,40 +6,44 @@ import Note from "./Note";
 import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
 
-const Notes = (props) => {
+const Notes = ({ setAuthToken, getAuthToken }) => {
   const [notes, setNotes] = useState([]);
   let navigate = useNavigate();
-  const token = localStorage.token;
+  const token = getAuthToken();
 
   useEffect(() => {
     const getNotes = async () => {
-      const res = await fetch(`${BASE_SERVER_URL}/notes/`, {
+      await fetch(`${BASE_SERVER_URL}/notes/`, {
         headers: {
           Authorization: token,
         },
-      });
-      if (res.status === 401) navigate("/");
-      else {
-        const data = await res.json();
-        setNotes(data !== "null" ? data : []);
-      }
+      })
+        .then((response) => {
+          if (response.status === 401) {
+            setAuthToken("");
+            navigate("/");
+          }
+          if (response.status === 200) return response.json();
+        })
+        .then((response) => {
+          setNotes(response !== null ? response : []);
+        });
     };
     getNotes();
   }, []);
 
   const onDelete = (id) => {
-    console.log(id);
     fetch(`${BASE_SERVER_URL}/notes/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: token,
       },
     });
-    setNotes(notes.filter((note) => note.id !== id));
+    setNotes(notes.filter((note) => note.ID !== id));
   };
 
   const updateOrAddNote = async (note) => {
-    if (note.id === 0) {
+    if (note.ID === 0) {
       fetch(`${BASE_SERVER_URL}/notes/`, {
         method: "POST",
         headers: {
@@ -50,12 +54,12 @@ const Notes = (props) => {
         .then((response) => response.json())
         .then((response) =>
           setNotes([
-            ...notes.filter((n) => n.id !== note.id),
-            { ...note, id: response.ID },
+            ...notes.filter((n) => n.ID !== note.ID),
+            { ...note, ID: response.ID },
           ])
         );
     } else {
-      await fetch(`${BASE_SERVER_URL}/notes/${note.id}`, {
+      await fetch(`${BASE_SERVER_URL}/notes/${note.ID}`, {
         method: "PUT",
         headers: {
           Authorization: token,
@@ -68,7 +72,7 @@ const Notes = (props) => {
   const notesItems = notes.map((note) => {
     return (
       <Note
-        key={note.id}
+        key={note.ID}
         note={note}
         onDelete={onDelete}
         onUpdateOrAdd={updateOrAddNote}
@@ -80,18 +84,18 @@ const Notes = (props) => {
     <Navigate to={{ pathname: "/" }} />
   ) : (
     <>
-    <MyNavbar />
-    <center>
-      <br />
-      {notesItems}
-      <Button
-        onClick={(e) =>
-          setNotes([...notes.filter((note) => note.id !== 0), { id: 0 }])
-        }
-      >
-        <FaPlus />
-      </Button>
-    </center>
+      <MyNavbar getAuthToken={getAuthToken}/>
+      <center>
+        <h1>Notes</h1>
+        {notesItems}
+        <Button
+          onClick={(e) =>
+            setNotes([...notes.filter((note) => note.ID !== 0), { ID: 0 }])
+          }
+        >
+          <FaPlus />
+        </Button>
+      </center>
     </>
   );
 };

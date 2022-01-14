@@ -12,32 +12,35 @@ import BASE_SERVER_URL from "../consts";
 import MyNavbar from "./Navbar";
 import MyModal from "./MyModal";
 
-const Login = ({ setAuthToken, getAuthToken }) => {
+const SignUp = ({ getAuthToken }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showModalError, setShowModalError] = useState(false);
+  const [adminSecret, setadminSecret] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [adminMode, setAdminMode] = useState(false);
 
   const navigate = useNavigate();
 
-  const login_user = async (event) => {
+  const signup_user = async (event) => {
     event.preventDefault();
-    await fetch(`${BASE_SERVER_URL}/login`, {
+    await fetch(`${BASE_SERVER_URL}/signup`, {
       method: "POST",
       body: JSON.stringify({
-        username: username,
-        password: password,
+        username,
+        password,
+        secret_phrase: adminSecret,
       }),
     })
       .then((response) => {
-        if (response.status !== 401) {
+        if (response.status === 200) {
           return response.json();
         } else {
-          setShowModalError(true);
+          setShowErrorModal(true);
+          return;
         }
       })
       .then((response) => {
-        setAuthToken(`${response.token}`);
-        navigate("/notes", { replace: true });
+        navigate("/", { replace: true });
       });
   };
 
@@ -46,13 +49,13 @@ const Login = ({ setAuthToken, getAuthToken }) => {
     <Navigate to={{ pathname: "/notes" }} />
   ) : (
     <>
-      <MyNavbar getAuthToken={getAuthToken}/>
+      <MyNavbar getAuthToken={getAuthToken} />
       <br />
       <Container>
         <Row>
           <Col></Col>
           <Col xs={6}>
-            <h2>Login</h2>
+            <h2>Sign Up</h2>
           </Col>
           <Col></Col>
         </Row>
@@ -63,11 +66,11 @@ const Login = ({ setAuthToken, getAuthToken }) => {
               style={{
                 boxShadow: "5px 5px 2px #9E9E9E",
                 border: "6px solid",
-                borderColor: "#616161 #9bc5c3 #9bc5c3 #616161",
+                borderColor: "#9bc5c3 #616161 #616161 #9bc5c3",
                 fontWeight: "550",
               }}
             >
-              <Form onSubmit={login_user}>
+              <Form onSubmit={signup_user}>
                 <FloatingLabel label="Username">
                   <Form.Control
                     type="username"
@@ -87,23 +90,46 @@ const Login = ({ setAuthToken, getAuthToken }) => {
                     }}
                   />
                 </FloatingLabel>
-                <center>
-                  <Button variant="primary" type="submit">
-                    Login
-                  </Button>
-                </center>
+                {adminMode && (
+                  <FloatingLabel label="Admins Secret">
+                    <Form.Control
+                      type="password"
+                      onChange={(e) => {
+                        setadminSecret(e.target.value);
+                      }}
+                    />
+                  </FloatingLabel>
+                )}
+                <Row>
+                  <Col></Col>
+                  <Col>
+                    <Button variant="info" type="submit">
+                      Sign UP
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      variant="light"
+                      onClick={(e) => {
+                        setAdminMode(!adminMode);
+                      }}
+                    >
+                      Admin signup
+                    </Button>
+                  </Col>
+                </Row>
               </Form>
             </div>
           </Col>
           <Col></Col>
         </Row>
 
-        {showModalError && (
-          <MyModal text="User not found" title="Login Error" />
+        {showErrorModal && (
+          <MyModal text="Username or password is incorrect" title="Error" />
         )}
       </Container>
     </>
   );
 };
 
-export default Login;
+export default SignUp;

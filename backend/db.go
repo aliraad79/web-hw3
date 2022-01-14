@@ -12,17 +12,16 @@ type Note struct {
 	Title  string `json:"Title" binding:"required"`
 	Body   string `json:"Body" binding:"required"`
 	UserID int
-	User   User `json:"owner" binding:"required"`
 }
 
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
 	Is_admin bool   `json:"is_admin"`
 }
 
-func initDB() (*gorm.DB, error) {
+func initDB() gorm.DB {
 
 	// for docker
 	// dsn := "host=db user=postgres password=postgres dbname=docker port=5432 sslmode=disable"
@@ -33,8 +32,12 @@ func initDB() (*gorm.DB, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	if err != nil {
+		panic("failed to connect to database")
+	}
+
 	// Migrate the schema
 	db.AutoMigrate(&Note{})
 	db.AutoMigrate(&User{})
-	return db, err
+	return *db
 }
