@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "react-bootstrap";
 import Note from "./Note";
-import {BASE_SERVER_URL} from "../consts";
+import { BASE_SERVER_URL } from "../consts";
 import MyNavbar from "./Navbar";
 
 const Notes = ({ setAuthToken, getAuthToken }) => {
@@ -55,7 +55,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
         .then((response) =>
           setNotes([
             ...notes.filter((n) => n.ID !== note.ID),
-            { ...note, ID: response.ID },
+            { ID: response.ID, body: response.body, title: response.title },
           ])
         );
     } else {
@@ -84,7 +84,7 @@ const Notes = ({ setAuthToken, getAuthToken }) => {
     <Navigate to={{ pathname: "/" }} />
   ) : (
     <>
-      <MyNavbar getAuthToken={getAuthToken}/>
+      <MyNavbar getAuthToken={getAuthToken} />
       <center>
         <h1>Notes</h1>
         {notesItems}

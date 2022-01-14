@@ -4,15 +4,18 @@ import { FaTrash, FaPencilAlt, FaCheckCircle } from "react-icons/fa";
 
 const Note = ({ note, onDelete, onUpdateOrAdd }) => {
   let empty_note = note.ID === 0;
-  const [title, setTitle] = useState(note.title);
-  const [body, setBody] = useState(note.body);
+  const [title, setTitle] = useState(!empty_note ? note.title : "");
+  const [body, setBody] = useState(!empty_note ? note.body : "");
   const [editMode, setEditMode] = useState(!empty_note);
   const [accept, setAccept] = useState(empty_note);
 
   return (
-    <Container className="" style={{
-      backgroundImage: "linear-gradient(to left, #616161, #9bc5c3)",
-    }}>
+    <Container
+      className=""
+      style={{
+        backgroundImage: "linear-gradient(to left, #616161, #9bc5c3)",
+      }}
+    >
       <br />
       <Form>
         <Row>
